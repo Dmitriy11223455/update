@@ -1,0 +1,32 @@
+
+name: Update Playlist
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          pip install playwright
+          playwright install chromium
+      - name: Run script
+        run: python grabber.py  # Проверьте, что имя файла совпадает!
+        env:
+          LOGIN: ${{ secrets.SMOTRET_LOGIN }}
+          PASSWORD: ${{ secrets.SMOTRET_PASSWORD }}
+      - name: Commit and Push
+        run: |
+          git config --global user.name "Bot"
+          git config --global user.email "bot@github.com"
+          git add playlist.m3u
+          git commit -m "Update tokens" || exit 0
+          git push
